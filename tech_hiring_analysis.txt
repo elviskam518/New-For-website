@@ -1,0 +1,32 @@
+======================================================================
+Tech Hiring Diversity Analysis Report
+======================================================================
+
+1. Overall Summary
+----------------------------------------
+Total applicants: 15,000
+Total hired: 6,159
+Overall hire rate: 41.06%
+
+2. Gender Analysis
+----------------------------------------
+Male: Applicants=10588, HireRate=43.56%
+Female: Applicants=4412, HireRate=35.06%
+
+3. Race Analysis
+----------------------------------------
+White: Applicants=7403, HireRate=45.72%
+Asian: Applicants=3774, HireRate=42.16%
+Black: Applicants=2323, HireRate=30.82%
+Hispanic: Applicants=1500, HireRate=31.13%
+
+4. Intersectional Analysis (Gender × Race)
+----------------------------------------
+Female + Asian: 37.20%
+Female + Black: 25.45%
+Female + Hispanic: 27.91%
+Female + White: 38.39%
+Male + Asian: 44.35%
+Male + Black: 32.95%
+Male + Hispanic: 32.54%
+Male + White: 48.71%

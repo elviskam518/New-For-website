@@ -1,0 +1,426 @@
+PS C:\Users\User\Downloads\Final-Project--main\Final-Project--main> & C:/Users/User/AppData/Local/Microsoft/WindowsApps/python3.11.exe "c:/Users/User/Downloads/Final-Project--main/Final-Project--main/more strict .py"
+======================================================================
+Loading Tech Industry Diversity Hiring Dataset
+======================================================================
+Features used: ['YearsExperience', 'EducationLevel', 'AlgorithmSkill', 'SystemDesignSkill', 'OverallInterviewScore', 'GitHubScore', 'NumLanguages', 'HasReferral', 'ResumeScore', 'TechInterviewScore', 'CultureFitScore']
+
+Dataset size:
+  - Train: 10,200
+  - Val:   1,800
+  - Test:  3,000
+  - Features: 11
+  - Sensitive groups (Gender): 2
+  - Intersectional groups: 8
+
+################################################################################
+TRAIN BASELINE
+################################################################################
+  Epoch 50/150, Loss: 0.5786
+  Epoch 100/150, Loss: 0.5775
+  Epoch 150/150, Loss: 0.5744
+
+Baseline VAL PredRate (t=0.5) = 29.50%
+          Group  Hire_Rate     DI  EO_gap
+  Male_Hispanic     0.2201 0.5847 -0.1920
+   Female_White     0.2570 0.6828 -0.1705
+     Male_White     0.3764 1.0000  0.0000
+   Female_Asian     0.2771 0.7360 -0.0720
+     Male_Black     0.1802 0.4787 -0.2323
+     Male_Asian     0.3359 0.8923  0.0104
+Female_Hispanic     0.2088 0.5547 -0.1421
+   Female_Black     0.1288 0.3421 -0.1833
+
+################################################################################
+ABLATION: Remove Biased Features (CultureFitScore, HasReferral, ResumeScore, OverallInterviewScore)
+################################################################################
+  Removed features: ['CultureFitScore', 'HasReferral', 'ResumeScore', 'OverallInterviewScore']
+  Remaining features (7): ['YearsExperience', 'EducationLevel', 'AlgorithmSkill', 'SystemDesignSkill', 'GitHubScore', 'NumLanguages', 'TechInterviewScore']
+  Epoch 50/150, Loss: 0.6052
+  Epoch 100/150, Loss: 0.6043
+  Epoch 150/150, Loss: 0.6026
+
+[Remove Biased Features] Acc=0.6673, F1=0.5059
+          Group  Hire_Rate     DI  EO_gap
+  Male_Hispanic     0.3158 1.0964  0.1233
+   Female_White     0.2757 0.9572  0.0014
+     Male_White     0.2880 1.0000  0.0000
+   Female_Asian     0.3074 1.0671  0.1130
+     Male_Black     0.2613 0.9071  0.0442
+     Male_Asian     0.2920 1.0138  0.0544
+Female_Hispanic     0.2637 0.9157  0.1763
+   Female_Black     0.1894 0.6576  0.1571
+
+################################################################################
+COMPARISON: Baseline vs Remove Features vs Fair CVAE
+################################################################################
+Method                              Acc       F1   Min DI   Features
+----------------------------------------------------------------------
+Baseline (11 features)           0.6903   0.5492   0.3421         11
+Remove biased (8 features)       0.6673   0.5059   0.6576          8
+  -> Accuracy drop from removing features: +2.30%
+  -> Min DI change: 0.3421 -> 0.6576
+
+(Fair CVAE results will appear below for comparison)
+======================================================================
+
+================================================================================
+RUN MODE = adv_only
+================================================================================
+
+======================================================================
+Training Fair CVAE v4  |  mode = adv_only
+======================================================================
+  Phase 1 (1-50):       Predictor warmup
+  Phase 2 (51-150):   VAE + HSIC + adversary
+  Phase 3 (151-250):  Full + gradient projection + orthogonal proj
+  Phase 4 (251-350):  Fine-tune with high HSIC + projection
+  λ_hsic=50.0, λ_adv=2.0, α_max=8.0
+  Adversary reset every 40 epochs
+  Projection update every 20 epochs
+======================================================================
+
+Epoch   1/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6574 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6689 | F1=0.5443 | AdvAcc=0.4406
+Epoch   2/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6175 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6739 | F1=0.5661 | AdvAcc=0.5000
+Epoch   3/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6019 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6706 | F1=0.5456 | AdvAcc=0.4794
+Epoch   4/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6023 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6767 | F1=0.5557 | AdvAcc=0.5111
+Epoch   5/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5971 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6717 | F1=0.5379 | AdvAcc=0.5039
+Epoch   6/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5920 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6689 | F1=0.5365 | AdvAcc=0.5283
+Epoch   7/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5937 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6667 | F1=0.5298 | AdvAcc=0.5039
+Epoch   8/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5894 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6744 | F1=0.5614 | AdvAcc=0.5050
+Epoch   9/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5873 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6689 | F1=0.5194 | AdvAcc=0.5367
+Epoch  10/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5893 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6778 | F1=0.5723 | AdvAcc=0.5183
+Epoch  20/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5789 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6744 | F1=0.5379 | AdvAcc=0.6117
+Epoch  30/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5774 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6706 | F1=0.5191 | AdvAcc=0.6022
+Epoch  40/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5729 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6756 | F1=0.5562 | AdvAcc=0.6144
+Epoch  50/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5698 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6722 | F1=0.5551 | AdvAcc=0.6106 Probe=0.6933
+Epoch  60/350 [Phase 2] | β=0.000 | α=0.09 | Pred=0.5650 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6656 | F1=0.5580 | AdvAcc=0.6200
+Epoch  70/350 [Phase 2] | β=0.000 | α=0.19 | Pred=0.5601 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6683 | F1=0.5481 | AdvAcc=0.6067
+Epoch  80/350 [Phase 2] | β=0.000 | α=0.29 | Pred=0.5490 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6506 | F1=0.4780 | AdvAcc=0.5756
+Epoch  90/350 [Phase 2] | β=0.000 | α=0.39 | Pred=0.5471 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6656 | F1=0.5521 | AdvAcc=0.5717
+  >>> Adversary reset at epoch 91
+Epoch 100/350 [Phase 2] | β=0.000 | α=0.49 | Pred=0.5407 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6644 | F1=0.5472 | AdvAcc=0.6050 Probe=0.6889
+Epoch 110/350 [Phase 2] | β=0.000 | α=0.59 | Pred=0.5346 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6489 | F1=0.5460 | AdvAcc=0.5617
+Epoch 120/350 [Phase 2] | β=0.000 | α=0.69 | Pred=0.5308 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6589 | F1=0.5411 | AdvAcc=0.5950
+Epoch 130/350 [Phase 2] | β=0.000 | α=0.79 | Pred=0.5270 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6461 | F1=0.5440 | AdvAcc=0.5794
+  >>> Adversary reset at epoch 131
+Epoch 140/350 [Phase 2] | β=0.000 | α=0.89 | Pred=0.5139 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6483 | F1=0.5449 | AdvAcc=0.5683
+Epoch 150/350 [Phase 2] | β=0.000 | α=0.99 | Pred=0.5125 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6611 | F1=0.5379 | AdvAcc=0.5794 Probe=0.6833
+Epoch 160/350 [Phase 3] | β=0.000 | α=1.63 | Pred=0.5182 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6439 | F1=0.5227 | AdvAcc=0.6528
+Epoch 170/350 [Phase 3] | β=0.000 | α=2.33 | Pred=0.5198 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6572 | F1=0.5265 | AdvAcc=0.5861
+  >>> Adversary reset at epoch 171
+Epoch 180/350 [Phase 3] | β=0.000 | α=3.03 | Pred=0.5103 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6450 | F1=0.5662 | AdvAcc=0.4761
+Epoch 190/350 [Phase 3] | β=0.000 | α=3.73 | Pred=0.5118 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6506 | F1=0.5358 | AdvAcc=0.5539
+Epoch 200/350 [Phase 3] | β=0.000 | α=4.43 | Pred=0.5121 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6428 | F1=0.5198 | AdvAcc=0.4317 Probe=0.6811
+Epoch 210/350 [Phase 3] | β=0.000 | α=5.13 | Pred=0.5061 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6356 | F1=0.5198 | AdvAcc=0.6144
+  >>> Adversary reset at epoch 211
+Epoch 220/350 [Phase 3] | β=0.000 | α=5.83 | Pred=0.4914 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6411 | F1=0.5339 | AdvAcc=0.6644
+Epoch 230/350 [Phase 3] | β=0.000 | α=6.53 | Pred=0.4926 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6383 | F1=0.5272 | AdvAcc=0.4350
+Epoch 240/350 [Phase 3] | β=0.000 | α=7.23 | Pred=0.4838 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6394 | F1=0.5266 | AdvAcc=0.7044
+Epoch 250/350 [Phase 3] | β=0.000 | α=7.93 | Pred=0.4945 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6339 | F1=0.5228 | AdvAcc=0.3017 Probe=0.6878
+  >>> Adversary reset at epoch 251
+Epoch 260/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4792 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6433 | F1=0.5355 | AdvAcc=0.2944
+Epoch 270/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4733 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6417 | F1=0.5323 | AdvAcc=0.6267
+Epoch 280/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4705 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6433 | F1=0.5414 | AdvAcc=0.7056
+Epoch 290/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4739 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6428 | F1=0.5404 | AdvAcc=0.6144
+  >>> Adversary reset at epoch 291
+Epoch 300/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4612 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6378 | F1=0.5336 | AdvAcc=0.7011 Probe=0.6833
+Epoch 310/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4665 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6428 | F1=0.5357 | AdvAcc=0.7056
+Epoch 320/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4653 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6378 | F1=0.5336 | AdvAcc=0.7006
+Epoch 330/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4659 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6411 | F1=0.5353 | AdvAcc=0.5639
+  >>> Adversary reset at epoch 331
+Epoch 340/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4604 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6394 | F1=0.5361 | AdvAcc=0.7056
+Epoch 350/350 [Phase 4] | β=0.000 | α=8.00 | Pred=0.4668 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6417 | F1=0.5390 | AdvAcc=0.3094 Probe=0.6911
+[adv_only] calibrated threshold=0.5769 | TEST PredRate=29.83% | Acc=0.6513 | F1=0.4942
+          Group  Hire_Rate     DI  EO_gap
+  Male_Hispanic     0.2440 0.7314 -0.0103
+   Female_White     0.2593 0.7773 -0.0480
+     Male_White     0.3337 1.0000  0.0000
+   Female_Asian     0.2944 0.8823 -0.0097
+     Male_Black     0.2643 0.7920  0.0066
+     Male_Asian     0.3244 0.9724  0.0868
+Female_Hispanic     0.3187 0.9551  0.0260
+   Female_Black     0.2045 0.6131  0.1277
+
+======================================================================
+LATENT SPACE VISUALISATION
+======================================================================
+
+[1] Extracting latent representations...
+  Baseline Z shape: (3000, 64)
+  CVAE Z (raw) shape: (3000, 64)
+  CVAE Z (projected) shape: (3000, 64)
+
+[2] Computing separation metrics...
+
+  Metric                        Baseline    Fair CVAE    Reduction
+  -------------------------------------------------------------
+  Centroid Distance               1.3713       0.8405        38.7%
+  Probe Accuracy                  0.7160       0.7000         2.2%
+  MMD (approx)                    0.1416       0.0782        44.8%
+
+[3] Computing t-SNE embeddings...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+
+[4] Generating visualisations...
+  Saved: latent_vis\fig_tsne_gender_comparison.png
+  Saved: latent_vis\fig_tsne_group_comparison.png
+  Saved: latent_vis\fig_tsne_projection_effect.png
+  Saved: latent_vis\fig_tsne_baseline_gender.png
+  Saved: latent_vis\fig_tsne_cvae_gender.png
+  Saved: latent_vis\fig_tsne_baseline_group.png
+  Saved: latent_vis\fig_tsne_cvae_group.png
+  Saved: latent_vis\fig_density_baseline.png
+  Saved: latent_vis\fig_density_cvae.png
+
+[5] Computing PCA embeddings...
+  PCA variance explained: 0.336, 0.117
+  PCA variance explained: 0.397, 0.124
+  Saved: latent_vis\fig_pca_gender_comparison.png
+
+======================================================================
+VISUALISATION COMPLETE
+All figures saved to: latent_vis/
+======================================================================
+
+================================================================================
+RUN MODE = no_adv
+================================================================================
+
+======================================================================
+Training Fair CVAE v4  |  mode = no_adv
+======================================================================
+  Phase 1 (1-50):       Predictor warmup
+  Phase 2 (51-150):   VAE + HSIC + adversary
+  Phase 3 (151-250):  Full + gradient projection + orthogonal proj
+  Phase 4 (251-350):  Fine-tune with high HSIC + projection
+  λ_hsic=50.0, λ_adv=2.0, α_max=8.0
+  Adversary reset every 40 epochs
+  Projection update every 20 epochs
+======================================================================
+
+Epoch   1/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6714 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6639 | F1=0.5455 | AdvAcc=0.6133
+Epoch   2/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6195 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6678 | F1=0.5747 | AdvAcc=0.5872
+Epoch   3/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6078 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6689 | F1=0.5785 | AdvAcc=0.6006
+Epoch   4/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6000 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6728 | F1=0.5500 | AdvAcc=0.5767
+Epoch   5/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5965 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6672 | F1=0.5346 | AdvAcc=0.5667
+Epoch   6/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5972 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6700 | F1=0.5593 | AdvAcc=0.5833
+Epoch   7/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5924 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6756 | F1=0.5576 | AdvAcc=0.5572
+Epoch   8/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5916 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6728 | F1=0.5487 | AdvAcc=0.5600
+Epoch   9/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5898 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6700 | F1=0.5286 | AdvAcc=0.5750
+Epoch  10/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5890 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6711 | F1=0.5075 | AdvAcc=0.5733
+Epoch  20/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5823 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6728 | F1=0.5541 | AdvAcc=0.5817
+Epoch  30/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5805 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6744 | F1=0.5165 | AdvAcc=0.5828
+Epoch  40/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5720 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6706 | F1=0.5656 | AdvAcc=0.5667
+Epoch  50/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5705 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6672 | F1=0.5417 | AdvAcc=0.5833 Probe=0.6933
+Epoch  60/350 [Phase 2] | β=0.009 | α=0.00 | Pred=0.5894 | Recon=0.1987 | KL=21.2180 | HSIC=0.001111 | ValAcc=0.6689 | F1=0.5380 | AdvAcc=0.6378
+Epoch  70/350 [Phase 2] | β=0.019 | α=0.00 | Pred=0.5886 | Recon=0.1843 | KL=14.8107 | HSIC=0.000901 | ValAcc=0.6600 | F1=0.5181 | AdvAcc=0.6456
+Epoch  80/350 [Phase 2] | β=0.029 | α=0.00 | Pred=0.5846 | Recon=0.2003 | KL=12.8337 | HSIC=0.000831 | ValAcc=0.6694 | F1=0.5420 | AdvAcc=0.6650
+Epoch  90/350 [Phase 2] | β=0.039 | α=0.00 | Pred=0.5822 | Recon=0.2275 | KL=11.4781 | HSIC=0.000859 | ValAcc=0.6661 | F1=0.5173 | AdvAcc=0.6644
+Epoch 100/350 [Phase 2] | β=0.049 | α=0.00 | Pred=0.5870 | Recon=0.2605 | KL=10.3449 | HSIC=0.000803 | ValAcc=0.6650 | F1=0.5285 | AdvAcc=0.6633 Probe=0.7156
+Epoch 110/350 [Phase 2] | β=0.059 | α=0.00 | Pred=0.5839 | Recon=0.2907 | KL=9.5134 | HSIC=0.000805 | ValAcc=0.6600 | F1=0.5049 | AdvAcc=0.6633
+Epoch 120/350 [Phase 2] | β=0.069 | α=0.00 | Pred=0.5877 | Recon=0.3163 | KL=8.8796 | HSIC=0.000813 | ValAcc=0.6672 | F1=0.5309 | AdvAcc=0.6678
+Epoch 130/350 [Phase 2] | β=0.079 | α=0.00 | Pred=0.5878 | Recon=0.3364 | KL=8.4164 | HSIC=0.000768 | ValAcc=0.6628 | F1=0.5117 | AdvAcc=0.6550
+Epoch 140/350 [Phase 2] | β=0.089 | α=0.00 | Pred=0.5883 | Recon=0.3541 | KL=8.0464 | HSIC=0.000787 | ValAcc=0.6611 | F1=0.5151 | AdvAcc=0.6739
+Epoch 150/350 [Phase 2] | β=0.099 | α=0.00 | Pred=0.5899 | Recon=0.3691 | KL=7.7824 | HSIC=0.000760 | ValAcc=0.6589 | F1=0.5072 | AdvAcc=0.6550 Probe=0.7222
+Epoch 160/350 [Phase 3] | β=0.105 | α=0.00 | Pred=0.5893 | Recon=0.3737 | KL=7.6862 | HSIC=0.000716 | ValAcc=0.6539 | F1=0.5036 | AdvAcc=0.6600
+Epoch 170/350 [Phase 3] | β=0.110 | α=0.00 | Pred=0.5912 | Recon=0.3763 | KL=7.6144 | HSIC=0.000736 | ValAcc=0.6644 | F1=0.5113 | AdvAcc=0.6711
+Epoch 180/350 [Phase 3] | β=0.115 | α=0.00 | Pred=0.5922 | Recon=0.3806 | KL=7.5353 | HSIC=0.000767 | ValAcc=0.6556 | F1=0.5040 | AdvAcc=0.6644
+Epoch 190/350 [Phase 3] | β=0.120 | α=0.00 | Pred=0.5874 | Recon=0.3823 | KL=7.4776 | HSIC=0.000734 | ValAcc=0.6672 | F1=0.5250 | AdvAcc=0.6606
+Epoch 200/350 [Phase 3] | β=0.124 | α=0.00 | Pred=0.5896 | Recon=0.3850 | KL=7.4159 | HSIC=0.000736 | ValAcc=0.6478 | F1=0.4879 | AdvAcc=0.6583 Probe=0.7233
+Epoch 210/350 [Phase 3] | β=0.130 | α=0.00 | Pred=0.5928 | Recon=0.3863 | KL=7.3941 | HSIC=0.000745 | ValAcc=0.6572 | F1=0.5004 | AdvAcc=0.6717
+Epoch 220/350 [Phase 3] | β=0.135 | α=0.00 | Pred=0.5922 | Recon=0.3907 | KL=7.3681 | HSIC=0.000775 | ValAcc=0.6594 | F1=0.4996 | AdvAcc=0.6733
+Epoch 230/350 [Phase 3] | β=0.140 | α=0.00 | Pred=0.5933 | Recon=0.3918 | KL=7.3280 | HSIC=0.000726 | ValAcc=0.6483 | F1=0.4924 | AdvAcc=0.6711
+Epoch 240/350 [Phase 3] | β=0.145 | α=0.00 | Pred=0.5905 | Recon=0.3914 | KL=7.2892 | HSIC=0.000719 | ValAcc=0.6572 | F1=0.5020 | AdvAcc=0.6572
+Epoch 250/350 [Phase 3] | β=0.150 | α=0.00 | Pred=0.5942 | Recon=0.3936 | KL=7.2716 | HSIC=0.000772 | ValAcc=0.6539 | F1=0.4898 | AdvAcc=0.6617 Probe=0.7233
+Epoch 260/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6041 | Recon=0.4493 | KL=6.9575 | HSIC=0.000711 | ValAcc=0.6611 | F1=0.4967 | AdvAcc=0.6689
+Epoch 270/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6008 | Recon=0.4602 | KL=6.9057 | HSIC=0.000687 | ValAcc=0.6478 | F1=0.4895 | AdvAcc=0.6733
+Epoch 280/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6047 | Recon=0.4647 | KL=6.8650 | HSIC=0.000716 | ValAcc=0.6572 | F1=0.4988 | AdvAcc=0.6644
+Epoch 290/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6073 | Recon=0.4635 | KL=6.8174 | HSIC=0.000687 | ValAcc=0.6500 | F1=0.4811 | AdvAcc=0.6644
+Epoch 300/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6052 | Recon=0.4750 | KL=6.7649 | HSIC=0.000683 | ValAcc=0.6522 | F1=0.5000 | AdvAcc=0.6528 Probe=0.7267
+Epoch 310/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6091 | Recon=0.4790 | KL=6.7312 | HSIC=0.000687 | ValAcc=0.6433 | F1=0.4685 | AdvAcc=0.6739
+Epoch 320/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6067 | Recon=0.4793 | KL=6.7011 | HSIC=0.000719 | ValAcc=0.6461 | F1=0.4867 | AdvAcc=0.6589
+Epoch 330/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6082 | Recon=0.4838 | KL=6.6916 | HSIC=0.000683 | ValAcc=0.6344 | F1=0.4711 | AdvAcc=0.6661
+Epoch 340/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6086 | Recon=0.4864 | KL=6.6777 | HSIC=0.000735 | ValAcc=0.6483 | F1=0.4899 | AdvAcc=0.6594
+Epoch 350/350 [Phase 4] | β=0.150 | α=0.00 | Pred=0.6070 | Recon=0.4811 | KL=6.6728 | HSIC=0.000699 | ValAcc=0.6567 | F1=0.4959 | AdvAcc=0.6528 Probe=0.7211
+[no_adv] calibrated threshold=0.4871 | TEST PredRate=29.73% | Acc=0.6617 | F1=0.5085
+          Group  Hire_Rate     DI  EO_gap
+  Male_Hispanic     0.2344 0.6776 -0.0836
+   Female_White     0.2687 0.7765 -0.0963
+     Male_White     0.3460 1.0000  0.0000
+   Female_Asian     0.3030 0.8758 -0.0459
+     Male_Black     0.2312 0.6683 -0.1239
+     Male_Asian     0.3302 0.9542  0.0609
+Female_Hispanic     0.2418 0.6987  0.0432
+   Female_Black     0.1667 0.4817 -0.0035
+
+======================================================================
+LATENT SPACE VISUALISATION
+======================================================================
+
+[1] Extracting latent representations...
+  Baseline Z shape: (3000, 64)
+  CVAE Z (raw) shape: (3000, 64)
+  CVAE Z (projected) shape: (3000, 64)
+
+[2] Computing separation metrics...
+
+  Metric                        Baseline    Fair CVAE    Reduction
+  -------------------------------------------------------------
+  Centroid Distance               1.3713       0.2860        79.1%
+  Probe Accuracy                  0.7160       0.7107         0.7%
+  MMD (approx)                    0.1416       0.0258        81.8%
+
+[3] Computing t-SNE embeddings...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+
+[4] Generating visualisations...
+  Saved: latent_vis\fig_tsne_gender_comparison.png
+  Saved: latent_vis\fig_tsne_group_comparison.png
+  Saved: latent_vis\fig_tsne_projection_effect.png
+  Saved: latent_vis\fig_tsne_baseline_gender.png
+  Saved: latent_vis\fig_tsne_cvae_gender.png
+  Saved: latent_vis\fig_tsne_baseline_group.png
+  Saved: latent_vis\fig_tsne_cvae_group.png
+  Saved: latent_vis\fig_density_baseline.png
+  Saved: latent_vis\fig_density_cvae.png
+
+[5] Computing PCA embeddings...
+  PCA variance explained: 0.336, 0.117
+  PCA variance explained: 0.324, 0.276
+  Saved: latent_vis\fig_pca_gender_comparison.png
+
+======================================================================
+VISUALISATION COMPLETE
+All figures saved to: latent_vis/
+======================================================================
+
+================================================================================
+RUN MODE = full
+================================================================================
+
+======================================================================
+Training Fair CVAE v4  |  mode = full
+======================================================================
+  Phase 1 (1-50):       Predictor warmup
+  Phase 2 (51-150):   VAE + HSIC + adversary
+  Phase 3 (151-250):  Full + gradient projection + orthogonal proj
+  Phase 4 (251-350):  Fine-tune with high HSIC + projection
+  λ_hsic=50.0, λ_adv=2.0, α_max=8.0
+  Adversary reset every 40 epochs
+  Projection update every 20 epochs
+======================================================================
+
+Epoch   1/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6652 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6678 | F1=0.5537 | AdvAcc=0.4833
+Epoch   2/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6180 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6800 | F1=0.5500 | AdvAcc=0.4872
+Epoch   3/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6078 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6744 | F1=0.5534 | AdvAcc=0.5122
+Epoch   4/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6000 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6761 | F1=0.5659 | AdvAcc=0.5089
+Epoch   5/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.6023 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6750 | F1=0.5353 | AdvAcc=0.5161
+Epoch   6/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5983 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6744 | F1=0.5267 | AdvAcc=0.5189
+Epoch   7/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5966 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6711 | F1=0.5446 | AdvAcc=0.5333
+Epoch   8/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5945 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6689 | F1=0.5131 | AdvAcc=0.5456
+Epoch   9/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5879 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6756 | F1=0.5372 | AdvAcc=0.5306
+Epoch  10/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5866 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6733 | F1=0.5355 | AdvAcc=0.5444
+Epoch  20/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5804 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6717 | F1=0.5492 | AdvAcc=0.5622
+Epoch  30/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5808 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6667 | F1=0.5575 | AdvAcc=0.5689
+Epoch  40/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5730 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6678 | F1=0.5622 | AdvAcc=0.5233
+Epoch  50/350 [Phase 1] | β=0.000 | α=0.00 | Pred=0.5701 | Recon=0.0000 | KL=0.0000 | HSIC=0.000000 | ValAcc=0.6694 | F1=0.5489 | AdvAcc=0.5267 Probe=0.7089
+Epoch  60/350 [Phase 2] | β=0.009 | α=0.09 | Pred=0.5864 | Recon=0.1939 | KL=21.0963 | HSIC=0.001116 | ValAcc=0.6561 | F1=0.4930 | AdvAcc=0.5856
+Epoch  70/350 [Phase 2] | β=0.019 | α=0.19 | Pred=0.5806 | Recon=0.1897 | KL=14.6263 | HSIC=0.000898 | ValAcc=0.6650 | F1=0.5157 | AdvAcc=0.5894
+Epoch  80/350 [Phase 2] | β=0.029 | α=0.29 | Pred=0.5831 | Recon=0.2062 | KL=12.5540 | HSIC=0.000827 | ValAcc=0.6667 | F1=0.4941 | AdvAcc=0.5900
+Epoch  90/350 [Phase 2] | β=0.039 | α=0.39 | Pred=0.5836 | Recon=0.2391 | KL=11.1020 | HSIC=0.000815 | ValAcc=0.6544 | F1=0.5048 | AdvAcc=0.5978
+  >>> Adversary reset at epoch 91
+Epoch 100/350 [Phase 2] | β=0.049 | α=0.49 | Pred=0.5867 | Recon=0.2675 | KL=10.0845 | HSIC=0.000782 | ValAcc=0.6656 | F1=0.5137 | AdvAcc=0.5783 Probe=0.7144
+Epoch 110/350 [Phase 2] | β=0.059 | α=0.59 | Pred=0.5855 | Recon=0.2924 | KL=9.3082 | HSIC=0.000789 | ValAcc=0.6678 | F1=0.5357 | AdvAcc=0.6272
+Epoch 120/350 [Phase 2] | β=0.069 | α=0.69 | Pred=0.5876 | Recon=0.3202 | KL=8.7914 | HSIC=0.000750 | ValAcc=0.6556 | F1=0.5171 | AdvAcc=0.5539
+Epoch 130/350 [Phase 2] | β=0.079 | α=0.79 | Pred=0.5870 | Recon=0.3444 | KL=8.3691 | HSIC=0.000753 | ValAcc=0.6583 | F1=0.4971 | AdvAcc=0.5844
+  >>> Adversary reset at epoch 131
+Epoch 140/350 [Phase 2] | β=0.089 | α=0.89 | Pred=0.5883 | Recon=0.3639 | KL=8.0634 | HSIC=0.000717 | ValAcc=0.6489 | F1=0.5131 | AdvAcc=0.6411
+Epoch 150/350 [Phase 2] | β=0.099 | α=0.99 | Pred=0.5887 | Recon=0.3818 | KL=7.7788 | HSIC=0.000701 | ValAcc=0.6506 | F1=0.4932 | AdvAcc=0.4967 Probe=0.7222
+
+  >>> Fitting orthogonal projection layer.
+  >>> Probe before projection: 0.7108
+  >>> Probe after projection:  0.7037
+  >>> Leakage reduced: 0.0071
+
+Epoch 160/350 [Phase 3+Proj+GP] | β=0.105 | α=1.63 | Pred=0.5999 | Recon=0.4106 | KL=7.6029 | HSIC=0.000654 | ValAcc=0.6683 | F1=0.5174 | AdvAcc=0.5306
+Epoch 170/350 [Phase 3+Proj+GP] | β=0.110 | α=2.33 | Pred=0.6009 | Recon=0.4210 | KL=7.5032 | HSIC=0.000667 | ValAcc=0.6461 | F1=0.4825 | AdvAcc=0.6067
+  >>> Adversary reset at epoch 171
+Epoch 180/350 [Phase 3+Proj+GP] | β=0.115 | α=3.03 | Pred=0.5986 | Recon=0.4152 | KL=7.4692 | HSIC=0.000665 | ValAcc=0.6517 | F1=0.4898 | AdvAcc=0.5211
+Epoch 190/350 [Phase 3+Proj+GP] | β=0.120 | α=3.73 | Pred=0.6000 | Recon=0.4220 | KL=7.4177 | HSIC=0.000657 | ValAcc=0.6628 | F1=0.5224 | AdvAcc=0.5744
+Epoch 200/350 [Phase 3+Proj+GP] | β=0.124 | α=4.43 | Pred=0.6023 | Recon=0.4305 | KL=7.3644 | HSIC=0.000630 | ValAcc=0.6478 | F1=0.4879 | AdvAcc=0.5894 Probe=0.7189
+Epoch 210/350 [Phase 3+Proj+GP] | β=0.130 | α=5.13 | Pred=0.6025 | Recon=0.4365 | KL=7.3369 | HSIC=0.000653 | ValAcc=0.6517 | F1=0.4840 | AdvAcc=0.6000
+  >>> Adversary reset at epoch 211
+Epoch 220/350 [Phase 3+Proj+GP] | β=0.135 | α=5.83 | Pred=0.6027 | Recon=0.4289 | KL=7.3030 | HSIC=0.000641 | ValAcc=0.6472 | F1=0.4756 | AdvAcc=0.6133
+Epoch 230/350 [Phase 3+Proj+GP] | β=0.140 | α=6.53 | Pred=0.6049 | Recon=0.4308 | KL=7.2746 | HSIC=0.000666 | ValAcc=0.6517 | F1=0.4771 | AdvAcc=0.5867
+Epoch 240/350 [Phase 3+Proj+GP] | β=0.145 | α=7.23 | Pred=0.6039 | Recon=0.4420 | KL=7.2360 | HSIC=0.000651 | ValAcc=0.6511 | F1=0.4818 | AdvAcc=0.3411
+Epoch 250/350 [Phase 3+Proj+GP] | β=0.150 | α=7.93 | Pred=0.6020 | Recon=0.4450 | KL=7.2152 | HSIC=0.000666 | ValAcc=0.6528 | F1=0.4847 | AdvAcc=0.4983 Probe=0.7244
+  >>> Adversary reset at epoch 251
+Epoch 260/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6112 | Recon=0.4889 | KL=6.9370 | HSIC=0.000629 | ValAcc=0.6428 | F1=0.4509 | AdvAcc=0.6150
+Epoch 270/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6084 | Recon=0.4938 | KL=6.8996 | HSIC=0.000637 | ValAcc=0.6394 | F1=0.4587 | AdvAcc=0.5422
+Epoch 280/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6110 | Recon=0.4967 | KL=6.8746 | HSIC=0.000657 | ValAcc=0.6372 | F1=0.4643 | AdvAcc=0.5383
+Epoch 290/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6127 | Recon=0.5003 | KL=6.8607 | HSIC=0.000648 | ValAcc=0.6383 | F1=0.4580 | AdvAcc=0.5422
+  >>> Adversary reset at epoch 291
+Epoch 300/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6108 | Recon=0.4980 | KL=6.8247 | HSIC=0.000624 | ValAcc=0.6417 | F1=0.4575 | AdvAcc=0.7056 Probe=0.7178
+Epoch 310/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6115 | Recon=0.5030 | KL=6.8172 | HSIC=0.000647 | ValAcc=0.6311 | F1=0.4373 | AdvAcc=0.2944
+Epoch 320/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6119 | Recon=0.5044 | KL=6.7828 | HSIC=0.000641 | ValAcc=0.6511 | F1=0.4758 | AdvAcc=0.4950
+Epoch 330/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6174 | Recon=0.5097 | KL=6.7719 | HSIC=0.000657 | ValAcc=0.6411 | F1=0.4599 | AdvAcc=0.4983
+  >>> Adversary reset at epoch 331
+Epoch 340/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6107 | Recon=0.5084 | KL=6.7698 | HSIC=0.000650 | ValAcc=0.6294 | F1=0.4456 | AdvAcc=0.5094
+Epoch 350/350 [Phase 4+Proj+GP] | β=0.150 | α=8.00 | Pred=0.6118 | Recon=0.5119 | KL=6.7603 | HSIC=0.000630 | ValAcc=0.6272 | F1=0.4413 | AdvAcc=0.5400 Probe=0.7156
+[full] calibrated threshold=0.4705 | TEST PredRate=31.27% | Acc=0.6597 | F1=0.5163
+          Group  Hire_Rate     DI  EO_gap
+  Male_Hispanic     0.3062 0.9447 -0.0054
+   Female_White     0.3411 1.0524  0.0898
+     Male_White     0.3241 1.0000  0.0000
+   Female_Asian     0.3377 1.0417  0.0976
+     Male_Black     0.2643 0.8153 -0.0243
+     Male_Asian     0.3111 0.9597  0.0260
+Female_Hispanic     0.3077 0.9492  0.1578
+   Female_Black     0.2273 0.7011  0.1413
+
+======================================================================
+LATENT SPACE VISUALISATION
+======================================================================
+
+[1] Extracting latent representations...
+  Baseline Z shape: (3000, 64)
+  CVAE Z (raw) shape: (3000, 64)
+  CVAE Z (projected) shape: (3000, 64)
+
+[2] Computing separation metrics...
+
+  Metric                        Baseline    Fair CVAE    Reduction
+  -------------------------------------------------------------
+  Centroid Distance               1.3713       0.1047        92.4%
+  Probe Accuracy                  0.7160       0.7007         2.1%
+  MMD (approx)                    0.1416       0.0097        93.2%
+
+[3] Computing t-SNE embeddings...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+  Computing t-SNE (n=3000, dim=64, perplexity=30)...
+
+[4] Generating visualisations...
+  Saved: latent_vis\fig_tsne_gender_comparison.png
+  Saved: latent_vis\fig_tsne_group_comparison.png
+  Saved: latent_vis\fig_tsne_projection_effect.png
+  Saved: latent_vis\fig_tsne_baseline_gender.png
+  Saved: latent_vis\fig_tsne_cvae_gender.png
+  Saved: latent_vis\fig_tsne_baseline_group.png
+  Saved: latent_vis\fig_tsne_cvae_group.png
+  Saved: latent_vis\fig_density_baseline.png
+  Saved: latent_vis\fig_density_cvae.png
+
+[5] Computing PCA embeddings...
+  PCA variance explained: 0.336, 0.117
+  PCA variance explained: 0.331, 0.237
+  Saved: latent_vis\fig_pca_gender_comparison.png
+
+======================================================================
+VISUALISATION COMPLETE
+All figures saved to: latent_vis/
+======================================================================

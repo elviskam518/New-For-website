@@ -1,0 +1,265 @@
+======================================================================
+STEP 2: BIAS ANALYSIS
+======================================================================
+Loaded: tech_diversity_hiring_data.csv
+Samples: 15,000
+Groups: ['Female_Asian', 'Female_Black', 'Female_Hispanic', 'Female_White', 'Male_Asian', 'Male_Black', 'Male_Hispanic', 'Male_White']
+
+Proxy Qualified: Top 40% = 6,000 candidates
+
+======================================================================
+PART 1: FAIRNESS METRICS
+======================================================================       
+
+Baseline group: Male_White
+Baseline hire rate: 48.7%
+
+          Group  Size  Hire_Rate  Qualified_Count    TPR     DI  EO_Gap      
+   Female_Black   660     0.2545              194 0.4381 0.5226 -0.2119      
+Female_Hispanic   455     0.2791              142 0.4366 0.5731 -0.2134      
+  Male_Hispanic  1045     0.3254              355 0.5127 0.6680 -0.1374      
+     Male_Black  1663     0.3295              602 0.5050 0.6765 -0.1451      
+   Female_Asian  1156     0.3720              413 0.5472 0.7637 -0.1028      
+   Female_White  2141     0.3839              751 0.5579 0.7882 -0.0921      
+     Male_Asian  2618     0.4435             1154 0.6265 0.9105 -0.0235      
+     Male_White  5262     0.4871             2389 0.6501 1.0000  0.0000      
+
+--------------------------------------------------
+VIOLATIONS:
+--------------------------------------------------
+
+  DI < 0.8 (potential discrimination):
+   Female_Black: DI = 0.5226
+   Female_Hispanic: DI = 0.5731
+   Male_Hispanic: DI = 0.6680
+   Male_Black: DI = 0.6765
+   Female_Asian: DI = 0.7637
+   Female_White: DI = 0.7882
+
+ |EO Gap| > 10% (unequal opportunity):
+   Female_Black: 21.2% lower than baseline
+   Female_Hispanic: 21.3% lower than baseline
+   Male_Hispanic: 13.7% lower than baseline
+   Male_Black: 14.5% lower than baseline
+   Female_Asian: 10.3% lower than baseline
+
+======================================================================       
+PART 2: ODDS RATIOS (controlling for qualifications)
+======================================================================       
+
+Baseline group: Male_White
+Model accuracy: 0.6907
+
+Group odds ratios (OR < 1 = disadvantaged):
+             Term  Coefficient  Odds_Ratio
+   G_Female_Black      -0.5160      0.5969
+G_Female_Hispanic      -0.4223      0.6555
+     G_Male_Black      -0.3684      0.6918
+  G_Male_Hispanic      -0.3469      0.7069
+   G_Female_Asian      -0.1946      0.8232
+     G_Male_Asian      -0.1414      0.8681
+   G_Female_White      -0.1198      0.8871
+
+  OR < 0.8 (significant disadvantage after controlling for qualifications):  
+   Female_Black: OR = 0.5969
+   Female_Hispanic: OR = 0.6555
+   Male_Black: OR = 0.6918
+   Male_Hispanic: OR = 0.7069
+
+======================================================================       
+PART 3: SHAP ANALYSIS (Why is each group disadvantaged?)
+======================================================================       
+Features: ['YearsExperience', 'EducationLevel', 'AlgorithmSkill', 'SystemDesignSkill', 'OverallInterviewScore', 'GitHubScore', 'NumLanguages', 'HasReferral', 'ResumeScore', 'TechInterviewScore', 'CultureFitScore']
+Model accuracy: 0.7233
+
+Calculating SHAP values...
+
+----------------------------------------------------------------------       
+WHY IS EACH GROUP DISADVANTAGED?
+----------------------------------------------------------------------       
+
+Female_Asian (hire rate: 37.2%, gap: -11.5%):
+  Main bias sources:
+    • OverallInterviewScore: -0.3103
+    • CultureFitScore: -0.0484
+    • HasReferral: -0.0305
+
+Female_Black (hire rate: 25.5%, gap: -23.3%):
+  Main bias sources:
+    • OverallInterviewScore: -0.6332
+    • CultureFitScore: -0.0757
+    • HasReferral: -0.0722
+
+Female_Hispanic (hire rate: 27.9%, gap: -20.8%):
+  Main bias sources:
+    • OverallInterviewScore: -0.5924
+    • HasReferral: -0.0755
+    • CultureFitScore: -0.0690
+
+Female_White (hire rate: 38.4%, gap: -10.3%):
+  Main bias sources:
+    • OverallInterviewScore: -0.3136
+    • CultureFitScore: -0.0510
+    • HasReferral: -0.0361
+
+Male_Asian (hire rate: 44.3%, gap: -4.4%):
+  Main bias sources:
+    • OverallInterviewScore: -0.0559
+    • CultureFitScore: -0.0173
+
+Male_Black (hire rate: 33.0%, gap: -15.8%):
+  Main bias sources:
+    • OverallInterviewScore: -0.3662
+    • CultureFitScore: -0.0519
+    • HasReferral: -0.0506
+
+Male_Hispanic (hire rate: 32.5%, gap: -16.2%):
+  Main bias sources:
+    • OverallInterviewScore: -0.3743
+    • CultureFitScore: -0.0483
+    • HasReferral: -0.0420
+
+----------------------------------------------------------------------       
+TOP BIAS-CAUSING FEATURES (averaged across groups):
+----------------------------------------------------------------------       
+                       Avg_Diff  Worst_Diff
+Feature
+OverallInterviewScore   -0.3780     -0.6332
+CultureFitScore         -0.0517     -0.0757
+HasReferral             -0.0445     -0.0755
+ResumeScore             -0.0179     -0.0286
+TechInterviewScore      -0.0108     -0.0261
+GitHubScore             -0.0012     -0.0043
+SystemDesignSkill       -0.0009     -0.0040
+AlgorithmSkill          -0.0008     -0.0051
+NumLanguages            -0.0005     -0.0014
+EducationLevel           0.0007     -0.0015
+YearsExperience          0.0067     -0.0003
+
+======================================================================       
+COUNTERFACTUAL: What would Female_Black need to match Male_White?
+======================================================================       
+
+  OverallInterviewScore:
+    Female_Black: 47.94
+    Male_White: 57.47
+    SHAP gap: -0.6332
+    → Would need 19.9% increase
+
+  CultureFitScore:
+    Female_Black: 48.60
+    Male_White: 64.01
+    SHAP gap: -0.0757
+    → Would need 31.7% increase
+
+  HasReferral:
+    Female_Black: 0.22
+    Male_White: 0.45
+    SHAP gap: -0.0722
+    → Would need 109.1% increase
+
+  TechInterviewScore:
+    Female_Black: 36.69
+    Male_White: 41.32
+    SHAP gap: -0.0261
+    → Would need 12.6% increase
+
+  ResumeScore:
+    Female_Black: 62.62
+    Male_White: 69.63
+    SHAP gap: -0.0241
+    → Would need 11.2% increase
+
+======================================================================       
+COUNTERFACTUAL: What would Female_Hispanic need to match Male_White?
+======================================================================       
+
+  OverallInterviewScore:
+    Female_Hispanic: 48.55
+    Male_White: 57.47
+    SHAP gap: -0.5924
+    → Would need 18.4% increase
+
+  HasReferral:
+    Female_Hispanic: 0.21
+    Male_White: 0.45
+    SHAP gap: -0.0755
+    → Would need 119.3% increase
+
+  CultureFitScore:
+    Female_Hispanic: 50.33
+    Male_White: 64.01
+    SHAP gap: -0.0690
+    → Would need 27.2% increase
+
+  ResumeScore:
+    Female_Hispanic: 61.97
+    Male_White: 69.63
+    SHAP gap: -0.0221
+    → Would need 12.4% increase
+
+  TechInterviewScore:
+    Female_Hispanic: 36.94
+    Male_White: 41.32
+    SHAP gap: -0.0206
+    → Would need 11.9% increase
+
+======================================================================       
+COUNTERFACTUAL: What would Male_Black need to match Male_White?
+======================================================================       
+
+  OverallInterviewScore:
+    Male_Black: 51.95
+    Male_White: 57.47
+    SHAP gap: -0.3662
+    → Would need 10.6% increase
+
+  CultureFitScore:
+    Male_Black: 55.04
+    Male_White: 64.01
+    SHAP gap: -0.0519
+    → Would need 16.3% increase
+
+  HasReferral:
+    Male_Black: 0.29
+    Male_White: 0.45
+    SHAP gap: -0.0506
+    → Would need 54.7% increase
+
+  ResumeScore:
+    Male_Black: 64.52
+    Male_White: 69.63
+    SHAP gap: -0.0221
+    → Would need 7.9% increase
+
+======================================================================       
+SUMMARY REPORT
+======================================================================       
+
+  DI violations (< 0.8):     6
+  EO violations (> 10%):     5
+  OR violations (< 0.8):     4
+  Total issues:              15
+
+  Most disadvantaged groups:
+    • Female_Black: DI = 0.5226, Hire Rate = 25.5%
+    • Female_Hispanic: DI = 0.5731, Hire Rate = 27.9%
+    • Male_Hispanic: DI = 0.6680, Hire Rate = 32.5%
+
+  Top bias-causing features (SHAP):
+    • OverallInterviewScore: -0.3780
+    • CultureFitScore: -0.0517
+    • HasReferral: -0.0445
+
+--------------------------------------------------
+  ⚠️  RECOMMENDATION: Apply bias mitigation
+     Run: python c.py (Adversarial Debiasing)
+
+======================================================================       
+Output files:
+  • fairness_metrics.csv
+  • odds_ratios.csv
+  • shap_bias_analysis.csv
+  • shap_feature_summary.csv
+======================================================================       
+PS C:\Users\User\Downloads\Final-Project--main\Final-Project--main> 
