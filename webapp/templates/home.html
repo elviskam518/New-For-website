@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>Project Overview</h2>
+  <p>This website runs your real fairness pipeline locally using <code>b.py</code>, <code>c.py</code>, <code>more strict .py</code>, and <code>latent_vis.py</code>.</p>
+  <ul>
+    <li>Real intermediate fairness analysis from <strong>b.py</strong></li>
+    <li>Model execution with background jobs (baseline/adversarial/Fair CVAE modes)</li>
+    <li>Live job status, progress, and logs</li>
+    <li>Latent-space visualisation generated from the real pipeline</li>
+  </ul>
+  <p><a class="btn" href="/demo">Start interactive run</a></p>
+</section>
+{% endblock %}
