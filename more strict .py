@@ -152,7 +152,7 @@ class OrthogonalProjection(nn.Module):
         directions = []
         
         for C in [0.1, 1.0, 10.0]:
-            probe = LogisticRegression(max_iter=2000, C=C, solver='lbfgs')
+            probe = LogisticRegression(max_iter=2000, C=C, solver='lbfgs', verbose=0)
             probe.fit(z_np, a_np)
             w = probe.coef_[0] 
             w = w / (np.linalg.norm(w) + 1e-10)  
@@ -409,7 +409,7 @@ def compute_sensitive_direction(model, data, device):
         mu, _ = model.encode(X)
         z_np = mu.cpu().numpy()
     
-    probe = LogisticRegression(max_iter=2000, C=1.0)
+    probe = LogisticRegression(max_iter=2000, C=1.0, verbose=0)
     probe.fit(z_np, a)
     direction = probe.coef_[0]
     direction = direction / (np.linalg.norm(direction) + 1e-10)
@@ -1009,8 +1009,18 @@ def baseline_val_pred_rate(model, data, device="cpu", threshold=0.5):
     return float(y_pred.mean()), y_prob
 
 def run_experiment(csv_path="tech_diversity_hiring_data.csv"):
+    import random
+    
+    # Comprehensive seed setting for reproducibility
+    random.seed(42)
     torch.manual_seed(42)
     np.random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(42)
+        torch.cuda.manual_seed_all(42)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     data = load_and_prepare_data(csv_path)
 

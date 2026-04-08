@@ -191,7 +191,7 @@ def run_shap_analysis(df, baseline_group="Male_White"):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
-    model = GradientBoostingClassifier(n_estimators=100, max_depth=4, random_state=42)
+    model = GradientBoostingClassifier(n_estimators=100, max_depth=4, random_state=42, verbose=0)
     model.fit(X_scaled, y)
     print(f"Model accuracy: {model.score(X_scaled, y):.4f}")
     
