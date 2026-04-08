@@ -18,6 +18,7 @@ function setState(job) {
     resultPanel.innerHTML = `
       <h4>Completed Result</h4>
       <p><b>Model:</b> ${result.model || '-'}</p>
+      <p><b>Seed:</b> ${job.summary.seed ?? '-'}</p>
       <p><b>Accuracy:</b> ${result.accuracy ?? '-'}</p>
       <p><b>F1:</b> ${result.f1 ?? '-'}</p>
       <p><b>Min DI:</b> ${result.min_di ?? '-'}</p>
