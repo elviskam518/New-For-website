@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import random
 import shutil
 import traceback
 from dataclasses import dataclass
@@ -21,6 +22,22 @@ from latent_vis import run_latent_visualisation
 
 LogFn = Callable[[str], None]
 ProgressFn = Callable[[int, str], None]
+
+
+def _convert_numpy_types(obj):
+    """Recursively convert numpy types to Python types for JSON serialization."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (np.integer, np.int32, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_convert_numpy_types(item) for item in obj]
+    else:
+        return obj
 
 
 @dataclass
@@ -92,6 +109,7 @@ def run_selected_model(
     csv_path: Path,
     out_dir: Path,
     model_name: str,
+    seed: int,
     include_latent_vis: bool,
     log: LogFn,
     progress: ProgressFn,
@@ -99,8 +117,29 @@ def run_selected_model(
     model_name = model_name.strip().lower()
     artifact_paths: dict[str, str] = {}
 
+    # Set unified seed for reproducibility
+    random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     with _capture_stdout(log):
         analysis_summary = run_intermediate_analysis(csv_path, out_dir, log, progress)
+
+        # Reset seed after intermediate analysis to ensure clean random state for model training
+        # This makes the model training results identical to direct script execution
+        random.seed(seed)
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
         progress(35, f"Preparing model run: {model_name}")
 
@@ -214,10 +253,11 @@ def run_selected_model(
     summary = {
         "analysis": analysis_summary,
         "result": result,
+        "seed": seed,
     }
 
     summary_path = out_dir / "result_summary.json"
-    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    summary_path.write_text(json.dumps(_convert_numpy_types(summary), indent=2), encoding="utf-8")
     artifact_paths["summary"] = "result_summary.json"
     progress(100, "Completed")
     return PipelineResult(summary=summary, artifact_paths=artifact_paths)
@@ -227,12 +267,13 @@ def run_pipeline_job(
     csv_path: Path,
     out_dir: Path,
     model_name: str,
+    seed: int,
     include_latent_vis: bool,
     log: LogFn,
     progress: ProgressFn,
 ):
     try:
-        return run_selected_model(csv_path, out_dir, model_name, include_latent_vis, log, progress)
+        return run_selected_model(csv_path, out_dir, model_name, seed, include_latent_vis, log, progress)
     except Exception as exc:
         log("Pipeline failed:\n" + traceback.format_exc())
         raise exc

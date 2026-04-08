@@ -4,6 +4,7 @@ import json
 import shutil
 from pathlib import Path
 
+import numpy as np
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -31,6 +32,22 @@ MODEL_OPTIONS = {
 }
 
 
+def _convert_numpy_types(obj):
+    """Recursively convert numpy types to Python types for JSON serialization."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (np.integer, np.int32, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
+
 def _job_to_dict(job):
     return {
         "id": job.id,
@@ -41,24 +58,24 @@ def _job_to_dict(job):
         "created_at": job.created_at,
         "finished_at": job.finished_at,
         "error": job.error,
-        "summary": job.summary,
+        "summary": _convert_numpy_types(job.summary) if job.summary else None,
         "artifacts": job.artifacts,
     }
-
-
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
-        "home.html",
-        {"request": request, "models": MODEL_OPTIONS},
+        request=request,
+        name="home.html",
+        context={"request": request, "models": MODEL_OPTIONS},
     )
 
 
 @app.get("/demo", response_class=HTMLResponse)
 def demo(request: Request):
     return templates.TemplateResponse(
-        "demo.html",
-        {"request": request, "models": MODEL_OPTIONS},
+        request=request,
+        name="demo.html",
+        context={"request": request, "models": MODEL_OPTIONS},
     )
 
 
@@ -66,20 +83,24 @@ def demo(request: Request):
 def results_page(request: Request):
     jobs = manager.latest_completed()
     return templates.TemplateResponse(
-        "results.html",
-        {"request": request, "jobs": jobs},
+        request=request,
+        name="results.html",
+        context={"request": request, "jobs": jobs},
     )
 
 
 @app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
-
-
+    return templates.TemplateResponse(
+        request=request,
+        name="about.html",
+        context={"request": request},
+    )
 @app.post("/api/jobs/start")
 async def start_job(
     file: UploadFile = File(...),
     model_name: str = Form(...),
+    seed: int = Form(42),
     include_latent_vis: bool = Form(False),
 ):
     if model_name not in MODEL_OPTIONS:
@@ -95,6 +116,7 @@ async def start_job(
     job = manager.create_job(
         csv_path=upload_path,
         model_name=model_name,
+        seed=seed,
         include_latent_vis=include_latent_vis,
     )
     return {"job_id": job.id}

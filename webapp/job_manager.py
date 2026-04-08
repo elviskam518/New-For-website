@@ -48,7 +48,7 @@ class JobManager:
             job.progress = int(max(0, min(100, pct)))
             job.progress_text = text
 
-    def _run_job(self, job_id: str, csv_path: Path, model_name: str, include_latent_vis: bool):
+    def _run_job(self, job_id: str, csv_path: Path, model_name: str, seed: int, include_latent_vis: bool):
         with self.lock:
             self.jobs[job_id].status = "running"
 
@@ -60,6 +60,7 @@ class JobManager:
                 csv_path=csv_path,
                 out_dir=out_dir,
                 model_name=model_name,
+                seed=seed,
                 include_latent_vis=include_latent_vis,
                 log=lambda msg: self._add_log(job_id, msg),
                 progress=lambda pct, text: self._set_progress(job_id, pct, text),
@@ -80,12 +81,12 @@ class JobManager:
                 job.error = str(exc)
                 job.finished_at = datetime.utcnow().isoformat()
 
-    def create_job(self, csv_path: Path, model_name: str, include_latent_vis: bool) -> JobState:
+    def create_job(self, csv_path: Path, model_name: str, seed: int, include_latent_vis: bool) -> JobState:
         job_id = str(uuid.uuid4())
         state = JobState(id=job_id)
         with self.lock:
             self.jobs[job_id] = state
-        self.pool.submit(self._run_job, job_id, csv_path, model_name, include_latent_vis)
+        self.pool.submit(self._run_job, job_id, csv_path, model_name, seed, include_latent_vis)
         return state
 
     def get_job(self, job_id: str) -> JobState | None:
