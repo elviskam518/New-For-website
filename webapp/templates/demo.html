@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>Interactive Demo</h2>
+  <form id="job-form">
+    <label>CSV Dataset
+      <input type="file" name="file" accept=".csv" required />
+    </label>
+    <label>Model (select exactly one)
+      <select name="model_name" required>
+        {% for key, label in models.items() %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="inline">
+      <input type="checkbox" name="include_latent_vis" value="true" /> Include latent visualisation
+    </label>
+    <button type="submit">Run Real Pipeline</button>
+  </form>
+</section>
+
+<section class="card" id="job-card" style="display:none">
+  <h3>Job Status</h3>
+  <p><strong>Job ID:</strong> <span id="job-id"></span></p>
+  <p><strong>Status:</strong> <span id="status">queued</span></p>
+  <p><strong>Progress:</strong> <span id="progress-text">Queued</span> (<span id="progress">0</span>%)</p>
+  <div class="progress-wrap"><div id="bar"></div></div>
+  <h4>Live Logs</h4>
+  <pre id="logs"></pre>
+  <div id="result-panel"></div>
+</section>
+
+<script src="/static/demo.js"></script>
+{% endblock %}
